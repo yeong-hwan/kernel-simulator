@@ -1,0 +1,11 @@
+## memory_allocate arg1
+- arg1: a positive integer of 16 or less (i.e., does not allocate memory space larger than the size of physical memory)
+  - Allocates contiguous virtual memory space for the number of pages given by arg1, and physical memory space on a non-contiguous basis. Running out of contiguous virtual memory space is not considered and running out of physical memory space causes one or more pages to be removed from physical memory using a **page replacement algorithm.**
+    - (1) First, secure as many empty frames as given arg1.
+    - (2) Then, allocate memory one by one
+  - All memory allocations start at the lowest address.
+  - Page IDs are assigned in an incremental order from 0 to 1, and are unique within a process, and are not reused. A new child process copies virtual memory from its parent process, which can be thought as starting fresh from the last Page ID of the parent process.
+  - Page IDs are assigned in unit of one page. That is, if the last Page ID was 10 and to assign additional 10 pages, the new pages will have IDs 11 through 20. This can be thought as incrementing by 1 from the last ID.
+  - The Allocation IDs start at 0 and are incremented by 1 each time the memory_allocate command is executed and is not reused. The Allocation ID exists for the memory_release command. The child process copies the Allocation ID information from the parent process at creation time, so it must start with the corresponding ID.
+- This command is a system call, which causes a mode switch to kernel mode.
+  - This means that the memory allocation operations described above are done in kernel mode
