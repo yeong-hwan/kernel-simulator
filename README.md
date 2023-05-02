@@ -12,6 +12,10 @@
   - Sleep from the second assignment is not implemented in this assignment.
 - User code commands: **memory_read, memory_write**
 
+<p align="center">
+  <img src="docs/imgs/process_status.png" alt="drawing" width="600"/>
+</p>
+
 ## Documatation
 
 **System Call**
@@ -109,6 +113,11 @@ In the cycle of finishing the kernel mode operation, the current process must be
 
 ### Kernel : fork_and_exec
 In the case of a command in which mode switching occurs in user mode, fork_cycle, sleep_cycle, and wait_cycle are assigned. In this way of reducing the command count, it is designed to check the command count every time it rotates the while loop and perform a predetermined operation. In the case of Fork_and_exec, a new forked_process was created and a command list corresponding to the forked_process was read from the user_command list.
+
+## Snapshot
+<p align="center">
+  <img src="docs/imgs/result.png" alt="drawing" width="500"/>
+</p>
 
 ## Environment
 OS: Mac Ventura  
