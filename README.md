@@ -85,26 +85,31 @@ if (mode == "user")
 }
 ```
 
-### Fixed actions & Page related command actions
-**memory_allocate : flow**
+## Fixed actions & Page related command actions
+
+### memory_allocate : flow 
 Memory_allocate proceeded in the following order.
 Among the page replacement algorithms, only fifo was partially implemented.
 1. start_index finding
 2. If issue:
-  - Page fault handler
-  - By page replace algorithm
+    - Page fault handler
+    - By page replace algorithm
 3. page_allocation
 4. frame_allocation
 5. page_table update
-  - page_location
-  - page_RorW_info
+    - page_location
+    - page_RorW_info
 
-**memory_write**
+### memory_write
 Other commands can be implemented according to the specification, but in particular, memory_write is a command that requires consideration of the page replacement algorithm.  
 Like memory_allocate, the frame, page, and page_table information were updated.
 
-**scheduling**
+### scheduling
 In the cycle of finishing the kernel mode operation, the current process must be scheduled, which was implemented by changing the state variable of the process from Ready to Running. It was simplified by implementing the schedule() function inside the class
 
-**Kernel : fork_and_exec**
+### Kernel : fork_and_exec
 In the case of a command in which mode switching occurs in user mode, fork_cycle, sleep_cycle, and wait_cycle are assigned. In this way of reducing the command count, it is designed to check the command count every time it rotates the while loop and perform a predetermined operation. In the case of Fork_and_exec, a new forked_process was created and a command list corresponding to the forked_process was read from the user_command list.
+
+## Environment
+OS: Mac Ventura  
+Language: C++ 17
