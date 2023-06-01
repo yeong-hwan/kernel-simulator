@@ -11,7 +11,7 @@ namespace fs = std::filesystem;
 
 class process
 {
-public:
+  public:
     string name;
     int id;
     int parent_id;
@@ -251,8 +251,7 @@ int main(int argc, char **argv)
         list<string>::iterator iter_pagetable_rw;
 
         // each process
-        for (iter3 = process_list.begin(); iter3 != process_list.end();
-             iter3++)
+        for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
         {
             process *temp = *iter3;
             int now_pid = 0;
@@ -262,13 +261,11 @@ int main(int argc, char **argv)
                 if (temp->wait_cnt == 1)
                 {
                     now_pid = temp->id;
-                    for (iter1 = waiting_queue.begin();
-                         iter1 != waiting_queue.end(); iter1++)
+                    for (iter1 = waiting_queue.begin(); iter1 != waiting_queue.end(); iter1++)
                     {
                         string process_candidate = *iter1;
 
-                        int process_wait_pid = stoi(process_candidate.substr(
-                            0, process_candidate.length() - 3));
+                        int process_wait_pid = stoi(process_candidate.substr(0, process_candidate.length() - 3));
                         if (process_wait_pid == now_pid)
                         {
                             temp->state = "Ready";
@@ -289,8 +286,7 @@ int main(int argc, char **argv)
             {
                 list<pair<int, queue<string> *>>::iterator iter2;
                 queue<string> *user_command_queue;
-                for (iter2 = pid_command_list.begin();
-                     iter2 != pid_command_list.end(); iter2++)
+                for (iter2 = pid_command_list.begin(); iter2 != pid_command_list.end(); iter2++)
                 {
                     int pid = iter2->first;
                     user_command_queue = iter2->second;
@@ -340,8 +336,7 @@ int main(int argc, char **argv)
                         iter_physical = process_now->physical_memory_list.begin();
 
                         for (iter_physical = process_now->physical_memory_list.begin();
-                             iter_physical != process_now->physical_memory_list.end();
-                             iter_physical++)
+                             iter_physical != process_now->physical_memory_list.end(); iter_physical++)
                         {
                             string page_num = *iter_physical;
 
@@ -379,8 +374,7 @@ int main(int argc, char **argv)
                         iter_physical = process_now->physical_memory_list.begin();
 
                         for (iter_physical = process_now->physical_memory_list.begin();
-                             iter_physical != process_now->physical_memory_list.end();
-                             iter_physical++)
+                             iter_physical != process_now->physical_memory_list.end(); iter_physical++)
                         {
                             string page_num = *iter_physical;
 
@@ -469,8 +463,7 @@ int main(int argc, char **argv)
                     {
                         init_command_queue = split(program_command[i], '\n');
 
-                        pid_command =
-                            make_pair(process_now->id, init_command_queue);
+                        pid_command = make_pair(process_now->id, init_command_queue);
                         pid_command_list.push_back(pid_command);
 
                         break;
@@ -515,10 +508,8 @@ int main(int argc, char **argv)
 
                     alloc_num = memory_allocate_num;
 
-                    for (iter_virtual =
-                             process_now->virtual_memory_list.begin();
-                         iter_virtual != process_now->virtual_memory_list.end();
-                         iter_virtual++)
+                    for (iter_virtual = process_now->virtual_memory_list.begin();
+                         iter_virtual != process_now->virtual_memory_list.end(); iter_virtual++)
                     {
                         // empty case
                         if (*iter_virtual == "-")
@@ -545,11 +536,8 @@ int main(int argc, char **argv)
 
                     iter_physical = process_now->physical_memory_list.begin();
 
-                    for (iter_physical =
-                             process_now->physical_memory_list.begin();
-                         iter_physical !=
-                         process_now->physical_memory_list.end();
-                         iter_physical++)
+                    for (iter_physical = process_now->physical_memory_list.begin();
+                         iter_physical != process_now->physical_memory_list.end(); iter_physical++)
                     {
                         if (*iter_physical == "-")
                         {
@@ -582,11 +570,8 @@ int main(int argc, char **argv)
 
                                 int idx_save = 0;
 
-                                for (iter_physical =
-                                         process_now->physical_memory_list.begin();
-                                     iter_physical !=
-                                     process_now->physical_memory_list.end();
-                                     iter_physical++)
+                                for (iter_physical = process_now->physical_memory_list.begin();
+                                     iter_physical != process_now->physical_memory_list.end(); iter_physical++)
                                 {
 
                                     string page_physical = *iter_physical;
@@ -596,10 +581,8 @@ int main(int argc, char **argv)
                                     {
                                         process_now->fifo_list.push_back(new_page);
                                         // replace
-                                        process_now->physical_memory_list.insert(
-                                            iter_physical, new_page);
-                                        process_now->physical_memory_list.erase(
-                                            iter_physical);
+                                        process_now->physical_memory_list.insert(iter_physical, new_page);
+                                        process_now->physical_memory_list.erase(iter_physical);
 
                                         // virtual page reallocation
                                         iter_virtual = process_now->virtual_memory_list.begin();
@@ -607,15 +590,13 @@ int main(int argc, char **argv)
                                         int virtual_cnt = alloc_num;
 
                                         for (iter_virtual = process_now->virtual_memory_list.begin();
-                                             iter_virtual != process_now->virtual_memory_list.end();
-                                             iter_virtual++)
+                                             iter_virtual != process_now->virtual_memory_list.end(); iter_virtual++)
                                         {
                                             if (virtual_idx > v_start_idx && virtual_cnt > 0)
                                             {
-                                                process_now->virtual_memory_list.insert(
-                                                    iter_virtual, to_string(page_id));
-                                                process_now->virtual_memory_list.erase(
-                                                    iter_virtual);
+                                                process_now->virtual_memory_list.insert(iter_virtual,
+                                                                                        to_string(page_id));
+                                                process_now->virtual_memory_list.erase(iter_virtual);
                                                 // cout << "\n"
                                                 virtual_cnt -= 1;
                                                 break;
@@ -674,10 +655,8 @@ int main(int argc, char **argv)
                     iter_virtual = process_now->virtual_memory_list.begin();
                     idx_virtual = 0; // 0~31 (reset)
 
-                    for (iter_virtual =
-                             process_now->virtual_memory_list.begin();
-                         iter_virtual != process_now->virtual_memory_list.end();
-                         iter_virtual++)
+                    for (iter_virtual = process_now->virtual_memory_list.begin();
+                         iter_virtual != process_now->virtual_memory_list.end(); iter_virtual++)
                     {
 
                         if (alloc_num == 0)
@@ -694,10 +673,8 @@ int main(int argc, char **argv)
                         {
                             alloc_num -= 1;
                             // replace
-                            process_now->virtual_memory_list.insert(
-                                iter_virtual, to_string(page_id));
-                            process_now->virtual_memory_list.erase(
-                                iter_virtual);
+                            process_now->virtual_memory_list.insert(iter_virtual, to_string(page_id));
+                            process_now->virtual_memory_list.erase(iter_virtual);
 
                             page_id += 1;
                         }
@@ -756,11 +733,8 @@ int main(int argc, char **argv)
 
                     int page_id_now = page_id_start;
 
-                    for (iter_physical =
-                             process_now->physical_memory_list.begin();
-                         iter_physical !=
-                         process_now->physical_memory_list.end();
-                         iter_physical++)
+                    for (iter_physical = process_now->physical_memory_list.begin();
+                         iter_physical != process_now->physical_memory_list.end(); iter_physical++)
                     {
                         // not useful
                         if (alloc_num == 0)
@@ -783,10 +757,8 @@ int main(int argc, char **argv)
                             process_now->fifo_list.push_back(now_string);
 
                             // replace
-                            process_now->physical_memory_list.insert(
-                                iter_physical, now_string);
-                            process_now->physical_memory_list.erase(
-                                iter_physical);
+                            process_now->physical_memory_list.insert(iter_physical, now_string);
+                            process_now->physical_memory_list.erase(iter_physical);
 
                             page_id_now += 1;
                             alloc_num -= 1;
@@ -809,8 +781,7 @@ int main(int argc, char **argv)
                     int idx_pt_p_loca = 0; // 0~31
 
                     for (iter_pagetable_p_loca = process_now->page_table_p_loca_list.begin();
-                         iter_pagetable_p_loca != process_now->page_table_p_loca_list.end();
-                         iter_pagetable_p_loca++)
+                         iter_pagetable_p_loca != process_now->page_table_p_loca_list.end(); iter_pagetable_p_loca++)
                     {
                         int idx_frame = frame_idx_list.front();
                         int idx_virtual = page_idx_list_1.front();
@@ -830,10 +801,8 @@ int main(int argc, char **argv)
                             page_idx_list_1.pop_front();
 
                             // idx_frame
-                            process_now->page_table_p_loca_list.insert(
-                                iter_pagetable_p_loca, to_string(idx_frame));
-                            process_now->page_table_p_loca_list.erase(
-                                iter_pagetable_p_loca);
+                            process_now->page_table_p_loca_list.insert(iter_pagetable_p_loca, to_string(idx_frame));
+                            process_now->page_table_p_loca_list.erase(iter_pagetable_p_loca);
 
                             // =============================
                             // iter_virtual = process_now->page_table_p_loca_list.begin();
@@ -870,10 +839,8 @@ int main(int argc, char **argv)
                         // // empty
                         else
                         {
-                            process_now->page_table_p_loca_list.insert(
-                                iter_pagetable_p_loca, "-");
-                            process_now->page_table_p_loca_list.erase(
-                                iter_pagetable_p_loca);
+                            process_now->page_table_p_loca_list.insert(iter_pagetable_p_loca, "-");
+                            process_now->page_table_p_loca_list.erase(iter_pagetable_p_loca);
                         }
                         idx_pt_p_loca += 1;
                     }
@@ -883,8 +850,7 @@ int main(int argc, char **argv)
                     int idx_pt_rw = 0;
 
                     for (iter_pagetable_rw = process_now->page_table_rw_list.begin();
-                         iter_pagetable_rw != process_now->page_table_rw_list.end();
-                         iter_pagetable_rw++)
+                         iter_pagetable_rw != process_now->page_table_rw_list.end(); iter_pagetable_rw++)
                     {
                         int idx_virtual = page_idx_list_2.front();
 
@@ -892,10 +858,8 @@ int main(int argc, char **argv)
                         {
                             page_idx_list_2.pop_front();
 
-                            process_now->page_table_rw_list.insert(
-                                iter_pagetable_rw, "W");
-                            process_now->page_table_rw_list.erase(
-                                iter_pagetable_rw);
+                            process_now->page_table_rw_list.insert(iter_pagetable_rw, "W");
+                            process_now->page_table_rw_list.erase(iter_pagetable_rw);
                         }
 
                         idx_pt_rw += 1;
@@ -1037,11 +1001,8 @@ int main(int argc, char **argv)
 
                             // cout << *iter_physical << "\n\n\n\n\n";
 
-                            for (iter_physical =
-                                     process_now->physical_memory_list.begin();
-                                 iter_physical !=
-                                 process_now->physical_memory_list.end();
-                                 iter_physical++)
+                            for (iter_physical = process_now->physical_memory_list.begin();
+                                 iter_physical != process_now->physical_memory_list.end(); iter_physical++)
                             {
 
                                 string page_num = *iter_physical;
@@ -1067,10 +1028,8 @@ int main(int argc, char **argv)
                                     process_now->fifo_list.push_back(new_page);
 
                                     // replace
-                                    process_now->physical_memory_list.insert(
-                                        iter_physical, new_page);
-                                    process_now->physical_memory_list.erase(
-                                        iter_physical);
+                                    process_now->physical_memory_list.insert(iter_physical, new_page);
+                                    process_now->physical_memory_list.erase(iter_physical);
                                 }
                             }
 
@@ -1135,11 +1094,8 @@ int main(int argc, char **argv)
                             // replace physical_memory
                             iter_physical = process_now->physical_memory_list.begin();
 
-                            for (iter_physical =
-                                     process_now->physical_memory_list.begin();
-                                 iter_physical !=
-                                 process_now->physical_memory_list.end();
-                                 iter_physical++)
+                            for (iter_physical = process_now->physical_memory_list.begin();
+                                 iter_physical != process_now->physical_memory_list.end(); iter_physical++)
                             {
 
                                 string page_num = *iter_physical;
@@ -1165,10 +1121,8 @@ int main(int argc, char **argv)
                                     process_now->fifo_list.push_back(new_page);
 
                                     // replace
-                                    process_now->physical_memory_list.insert(
-                                        iter_physical, new_page);
-                                    process_now->physical_memory_list.erase(
-                                        iter_physical);
+                                    process_now->physical_memory_list.insert(iter_physical, new_page);
+                                    process_now->physical_memory_list.erase(iter_physical);
                                 }
                             }
 
@@ -1186,10 +1140,9 @@ int main(int argc, char **argv)
                                 if (*iter_pagetable_p_loca == to_string(memory_write_num))
                                 {
                                     // idx_frame
-                                    process_now->page_table_p_loca_list.insert(
-                                        iter_pagetable_p_loca, to_string(memory_write_num));
-                                    process_now->page_table_p_loca_list.erase(
-                                        iter_pagetable_p_loca);
+                                    process_now->page_table_p_loca_list.insert(iter_pagetable_p_loca,
+                                                                               to_string(memory_write_num));
+                                    process_now->page_table_p_loca_list.erase(iter_pagetable_p_loca);
 
                                     break;
                                 }
@@ -1200,17 +1153,14 @@ int main(int argc, char **argv)
                             int idx_pt_rw = 0;
 
                             for (iter_pagetable_rw = process_now->page_table_rw_list.begin();
-                                 iter_pagetable_rw != process_now->page_table_rw_list.end();
-                                 iter_pagetable_rw++)
+                                 iter_pagetable_rw != process_now->page_table_rw_list.end(); iter_pagetable_rw++)
                             {
 
                                 if (idx_link == idx_pt_rw)
                                 {
 
-                                    process_now->page_table_rw_list.insert(
-                                        iter_pagetable_rw, "W");
-                                    process_now->page_table_rw_list.erase(
-                                        iter_pagetable_rw);
+                                    process_now->page_table_rw_list.insert(iter_pagetable_rw, "W");
+                                    process_now->page_table_rw_list.erase(iter_pagetable_rw);
                                 }
 
                                 idx_pt_rw += 1;
@@ -1319,11 +1269,9 @@ int main(int argc, char **argv)
                     {
                         if (program_name[i] == forked_process->name)
                         {
-                            fork_command_queue =
-                                split(program_command[i], '\n');
+                            fork_command_queue = split(program_command[i], '\n');
 
-                            pid_command = make_pair(forked_process->id,
-                                                    fork_command_queue);
+                            pid_command = make_pair(forked_process->id, fork_command_queue);
                             pid_command_list.push_back(pid_command);
 
                             break;
@@ -1375,15 +1323,12 @@ int main(int argc, char **argv)
                     iter_wtor = forked_process->page_table_rw_list.begin();
 
                     for (iter_wtor = forked_process->page_table_rw_list.begin();
-                         iter_wtor != forked_process->page_table_rw_list.end();
-                         iter_wtor++)
+                         iter_wtor != forked_process->page_table_rw_list.end(); iter_wtor++)
                     {
                         if (*iter_wtor == "W")
                         {
-                            forked_process->page_table_rw_list.insert(
-                                iter_wtor, "R");
-                            forked_process->page_table_rw_list.erase(
-                                iter_wtor);
+                            forked_process->page_table_rw_list.insert(iter_wtor, "R");
+                            forked_process->page_table_rw_list.erase(iter_wtor);
                         }
                     }
 
@@ -1407,14 +1352,12 @@ int main(int argc, char **argv)
 
                     process_now->state = "Ready";
 
-                    for (iter3 = process_list.begin();
-                         iter3 != process_list.end(); iter3++)
+                    for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
                     {
                         process *temp = *iter3;
                         if (temp->parent_id == process_now->id)
                         {
-                            if (temp->state == "dead" or
-                                temp->state == "Terminated")
+                            if (temp->state == "dead" or temp->state == "Terminated")
                             {
                                 process_now->state = "Waiting";
                                 wait_trigger = "on";
@@ -1475,24 +1418,19 @@ int main(int argc, char **argv)
                     }
                     else
                     {
-                        for (iter1 = waiting_queue.begin();
-                             iter1 != waiting_queue.end(); iter1++)
+                        for (iter1 = waiting_queue.begin(); iter1 != waiting_queue.end(); iter1++)
                         {
                             string wait_process_full = *iter1;
-                            int wait_process = stoi(wait_process_full.substr(
-                                0, wait_process_full.length() - 3));
+                            int wait_process = stoi(wait_process_full.substr(0, wait_process_full.length() - 3));
 
                             if (wait_process == parent_id_now)
                             {
                                 // use like pop
                                 string process_now_iter = *iter1;
-                                int process_now_id =
-                                    stoi(process_now_iter.substr(
-                                        0, process_now_iter.length() - 3));
+                                int process_now_id = stoi(process_now_iter.substr(0, process_now_iter.length() - 3));
                                 waiting_queue.erase(iter1);
 
-                                for (iter3 = process_list.begin();
-                                     iter3 != process_list.end(); iter3++)
+                                for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
                                 {
                                     process *temp = *iter3;
                                     if (temp->id == process_now_id)
@@ -1648,8 +1586,7 @@ int main(int argc, char **argv)
         int idx_physical = 0; // 0~15
 
         for (iter_physical = process_now->physical_memory_list.begin();
-             iter_physical != process_now->physical_memory_list.end();
-             iter_physical++)
+             iter_physical != process_now->physical_memory_list.end(); iter_physical++)
         {
             if (idx_physical % 4 == 0)
             {
@@ -1672,8 +1609,7 @@ int main(int argc, char **argv)
         }
         answer += "|\n";
 
-        if (command != "boot" && command != "system call" &&
-            command != "fault")
+        if (command != "boot" && command != "system call" && command != "fault")
         {
             // virtual memory
             answer += "5. virtual memory:\n";
@@ -1682,8 +1618,7 @@ int main(int argc, char **argv)
             int idx_virtual = 0; // 0~31
 
             for (iter_virtual = process_now->virtual_memory_list.begin();
-                 iter_virtual != process_now->virtual_memory_list.end();
-                 iter_virtual++)
+                 iter_virtual != process_now->virtual_memory_list.end(); iter_virtual++)
             {
                 if (idx_virtual % 4 == 0)
                 {
@@ -1712,11 +1647,8 @@ int main(int argc, char **argv)
             iter_pagetable_p_loca = process_now->page_table_p_loca_list.begin();
             int idx_pagetable_p_loca = 0; // 0~31
 
-            for (iter_pagetable_p_loca =
-                     process_now->page_table_p_loca_list.begin();
-                 iter_pagetable_p_loca !=
-                 process_now->page_table_p_loca_list.end();
-                 iter_pagetable_p_loca++)
+            for (iter_pagetable_p_loca = process_now->page_table_p_loca_list.begin();
+                 iter_pagetable_p_loca != process_now->page_table_p_loca_list.end(); iter_pagetable_p_loca++)
             {
                 if (idx_pagetable_p_loca % 4 == 0)
                 {
@@ -1743,8 +1675,7 @@ int main(int argc, char **argv)
             int idx_pagetable_rw = 0; // 0~31
 
             for (iter_pagetable_rw = process_now->page_table_rw_list.begin();
-                 iter_pagetable_rw != process_now->page_table_rw_list.end();
-                 iter_pagetable_rw++)
+                 iter_pagetable_rw != process_now->page_table_rw_list.end(); iter_pagetable_rw++)
             {
                 if (idx_pagetable_rw % 4 == 0)
                 {
