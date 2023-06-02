@@ -76,6 +76,7 @@ int main(int argc, char **argv)
 
     string end_trigger = "off";
     process process_terminated;
+    process forked_process;
 
     string user_trigger = "off";
 
@@ -160,37 +161,59 @@ int main(int argc, char **argv)
             }
         }
 
-        // user case(user case imp need)
+        // user case
         if (mode == "user")
         {
             // not running
             if (run_reamin_cycle == 0)
             {
                 // input implementation need
+                string command;
+                std::cin >> command;
+                string command_sliced = command.substr(0, 1);
 
                 // run
-                if ()
+                if (command_sliced == "r")
                 {
+                    int run_remain_cycle = stoi(command.substr(4));
+                    run_remain_cycle -= 1;
                 }
 
                 // sleep
-                else if ()
+                else if (command_sliced == "s")
                 {
+                    int sleep_remain_cycle = stoi(command.substr(6));
+                    sleep_case = sleep_remain_cycle;
+                    process_now.wait_cnt = (sleep_remain_cycle + 1);
+                    process_now.is_wait = "on";
+
+                    mode = "kernel";
                 }
 
                 // fork_and_exec
-                else if ()
+                else if (command_sliced == "f")
                 {
+                    string new_program_name = command.substr(14);
+                    fork_cycle = 2;
+
+                    mode = "kernel";
                 }
 
                 // wait
-                else if ()
+                else if (command_sliced == "w")
                 {
+                    wait_cycle = 2;
+
+                    mode = "kernel";
                 }
 
                 // exit
-                else if ()
+                else if (command_sliced == "e")
                 {
+                    exit_cycle = 2;
+                    process_now.is_wait = "off";
+
+                    mode = "kernel";
                 }
             }
             // if running
@@ -218,7 +241,6 @@ int main(int argc, char **argv)
             //
             else if (cycle == 1)
             {
-                // p_line 141
                 process_now.state = "Ready";
 
                 kernel_mode = "schedule";
@@ -235,6 +257,17 @@ int main(int argc, char **argv)
                 {
                     kernel_mode = "system_call";
                     command = kernel_mode;
+
+                    process forked_process = process(new_program_name);
+                    process_list.push_back(forked_process);
+                    forked_process.state = "New";
+                    forked_process.parent_id = process_now.id;
+
+                    process_id += 1;
+                    forked_process.id = process_id;
+
+                    process_now.state = "Ready";
+                    ready_queue.push_back(process_now);
                 }
                 //
                 else if (fork_cycle == 0)
@@ -242,7 +275,15 @@ int main(int argc, char **argv)
                     kernel_mode = "schedule";
                     command = kernel_mode;
 
-                    // p_line 172
+                    process_now = ready_queue.front();
+                    ready_queue.pop_front();
+
+                    process_now.schedule();
+
+                    ready_queue.push_back(forked_process);
+                    forked_process.state = "Ready";
+
+                    user_trigger = "on";
                 }
             }
             // sleep
@@ -253,7 +294,7 @@ int main(int argc, char **argv)
                 {
                     if (process_now.wait_cnt == 1)
                     {
-                        kernel_mode == "system call";
+                        kernel_mode = "system call";
                         command = kernel_mode;
 
                         process_now.state = "Waiting";
@@ -281,7 +322,7 @@ int main(int argc, char **argv)
                 {
                     if (process_now.wait_cnt == 2)
                     {
-                        kernel_mode == " system call";
+                        kernel_mode = " system call";
                         command = kernel_mode;
 
                         process_now.state = "Waiting";
@@ -294,7 +335,7 @@ int main(int argc, char **argv)
                     }
                     else if (process_now.wait_cnt == 1)
                     {
-                        kernel_mode == "schedule";
+                        kernel_mode = "schedule";
                         command = kernel_mode;
 
                         // process_now = ready_queue.pop(0)
@@ -529,10 +570,10 @@ int main(int argc, char **argv)
         if (waiting_queue.size() != 0)
         {
             waiting = "";
-            for (iter = waiting_queue.begin(); iter != waiting_queue.end(); iter++)
+            for (iter1 = waiting_queue.begin(); iter1 != waiting_queue.end(); iter1++)
             {
                 waiting += " ";
-                waiting += *iter;
+                waiting += *iter1;
             }
         }
 
@@ -600,6 +641,8 @@ int main(int argc, char **argv)
         }
 
         cycle += 1;
-
-        return 0;
     }
+
+    std::cout << answer;
+    return 0;
+}
