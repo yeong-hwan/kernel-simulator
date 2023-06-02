@@ -44,6 +44,10 @@ class process
     }
 };
 
+int program_num;
+string *program_name;
+string *program_command;
+
 int main(int argc, char **argv)
 {
     int cycle = 0;
@@ -71,7 +75,7 @@ int main(int argc, char **argv)
     string wait_to_ready = "off";
 
     string end_trigger = "off";
-    string process_terminated = "";
+    process process_terminated;
 
     string user_trigger = "off";
 
@@ -80,19 +84,27 @@ int main(int argc, char **argv)
     string dir_name = argv[1];
     for (const auto &entry : fs::directory_iterator(dir_name))
     {
-        if (entry.path().filename().string() == "init")
+        program_num++;
+    }
+    program_name = new string[program_num];
+    program_command = new string[program_num];
+    int i = 0;
+    for (const auto &entry : fs::directory_iterator(dir_name))
+    {
+        program_name[i] = entry.path().filename().string();
+        ifstream file(entry.path());
+        string temp_command;
+        if (file.is_open())
         {
-            ifstream file(entry.path());
-            if (file.is_open())
+            string line;
+            while (getline(file, line))
             {
-                string line;
-                while (getline(file, line))
-                {
-                    cout << line << '\n';
-                }
-                file.close();
+                temp_command += line;
             }
+            file.close();
         }
+        program_command[i] = temp_command;
+        i++;
     }
 
     while (true)
@@ -481,12 +493,12 @@ int main(int argc, char **argv)
 
         if (process_now.state == "Running")
         {
-            running = process_id;
+            running = process_now.id;
             running += "(";
             running += process_now.name;
             running += ", ";
             running += process_now.parent_id;
-            running += ")\n";
+            running += ")";
         }
 
         answer += "3. running: ";
@@ -494,7 +506,100 @@ int main(int argc, char **argv)
         answer += "\n";
 
         // ready
-        string ready = "none";
+        string ready = " none";
+
+        if (ready_queue.size() != 0)
+        {
+            string ready = "";
+
+            for (iter = ready_queue.begin(); iter != ready_queue.end(); iter++)
+            {
+                ready += " ";
+                ready += iter->id;
+            }
+        }
+
+        answer += "4. ready:";
+        answer += ready;
+        answer += "\n";
+
+        // waiting
+        string waiting = " none";
+
+        if (waiting_queue.size() != 0)
+        {
+            waiting = "";
+            for (iter = waiting_queue.begin(); iter != waiting_queue.end(); iter++)
+            {
+                waiting += " ";
+                waiting += *iter;
+            }
+        }
+
+        answer += "5. waiting:";
+        answer += waiting;
+        answer += "\n";
+
+        // new
+        string new_str = "none";
+        for (iter = process_list.begin(); iter != process_list.end(); iter++)
+        {
+            if (iter->state == "New")
+            {
+                new_str = iter->id;
+                new_str += "(";
+                new_str += iter->name;
+                new_str += ", ";
+                new_str += iter->parent_id;
+                new_str += ")";
+            }
+
+            answer += "6. new: ";
+            answer += new_str;
+            answer += "\n";
+        }
+
+        // terminated
+        string terminated;
+        if (process_terminated.id == 0)
+        {
+            terminated = "none";
+
+            answer += "7. terminated: ";
+            answer += terminated;
+            answer += "\n";
+        }
+        else if (process_terminated.state == "Terminated")
+        {
+            terminated += process_terminated.id;
+            terminated += "(";
+            terminated += process_terminated.name;
+            terminated += ", ";
+            terminated += process_terminated.parent_id;
+            terminated += ")";
+
+            answer += "7. terminated: ";
+            answer += terminated;
+            answer += "\n";
+
+            process_terminated.state = "dead";
+        }
+        else
+        {
+            terminated = "none";
+
+            answer += "7. terminated: ";
+            answer += terminated;
+            answer += "\n";
+        }
+        answer += "\n";
+
+        if (end_trigger == "on")
+        {
+            break;
+        }
+
+        cycle += 1;
 
         return 0;
     }
