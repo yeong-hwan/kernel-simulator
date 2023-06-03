@@ -3,9 +3,12 @@
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <queue>
+#include <sstream>
 #include <string>
+
 using namespace std;
-namespace fs = filesystem;
+namespace fs = std::filesystem;
 
 class process
 {
@@ -47,6 +50,21 @@ class process
 int program_num;
 string *program_name;
 string *program_command;
+
+queue<string> split(string str, char Delimiter)
+{
+    istringstream iss(str);
+    string buffer;
+
+    queue<string> result;
+
+    while (getline(iss, buffer, Delimiter))
+    {
+        result.push(buffer);
+    }
+
+    return result;
+}
 
 int main(int argc, char **argv)
 {
@@ -101,6 +119,7 @@ int main(int argc, char **argv)
             while (getline(file, line))
             {
                 temp_command += line;
+                temp_command += "\n";
             }
             file.close();
         }
@@ -108,11 +127,45 @@ int main(int argc, char **argv)
         i++;
     }
 
+    // // cout each line of program
+    // for (i = 0; i < program_num; i++) {
+    //     cout << program_name[i] << ":\n";
+    //     cout << program_command[i] << "\n";
+    // }
+
+    /*
+    pid_command_list (2d)
+    row : pid
+    col : command
+    */
+    // 2d implement
+    // 2d access
+    queue<string> command_queue;
+
+    pair<int, queue<string>> pid_command;
+    pid_command = make_pair(0, command_queue);
+
+    list<pair<int, queue<string>>> pid_command_list;
+    pid_command_list.push_back(pid_command);
+
+    list<pair<int, queue<string>>>::iterator iter2;
+
+    // for (iter2 = pid_command_list.begin(); iter2 != pid_command_list.end();
+    //      iter2++) {
+    //     int pid = iter2->first;
+    //     command_queue = iter2->second;
+
+    //     cout << pid << "\n";
+    //     cout << command_queue.size() << "\n";
+    // }
+
     while (true)
     {
         answer += "[cycle #";
-        answer += cycle;
+        answer += to_string(cycle);
         answer += "]\n";
+
+        // std::cout << answer;
 
         if (cycle == 2)
         {
@@ -124,13 +177,7 @@ int main(int argc, char **argv)
             mode = "user";
             user_trigger = "off";
         }
-        /*
-                string str1 = "abcde";
 
-                cout << str1.substr(str1.length() - 1) << endl;  // e
-                cout << str1.substr(str1.length() - 2) << endl;  // de
-                cout << str1.substr(str1.length() - 3) << endl;  // cde
-        */
         answer += "1. mode: ";
         answer += mode;
         list<process>::iterator iter;
@@ -167,9 +214,30 @@ int main(int argc, char **argv)
             // not running
             if (run_reamin_cycle == 0)
             {
-                // input implementation need
-                string command;
-                std::cin >> command;
+                // for list 순회
+                //    int pid = pid_command.first
+                //    command_queue = pid_command.second
+                //    if process_now.id == pid:
+                //         command = command_queue.front()
+                //         command_queue.pop()
+                //         break;
+
+                // for (pair<int, queue<string>>& pid_command_now :
+                //      pid_command_list)
+                list<pair<int, queue<string>>>::iterator iter2;
+                for (iter2 = pid_command_list.begin(); iter2 != pid_command_list.end(); iter2++)
+                {
+                    int pid = iter2->first;
+                    command_queue = iter2->second;
+
+                    if (process_now.id == pid)
+                    {
+                        command = command_queue.front();
+                        command_queue.pop();
+                        break;
+                    }
+                }
+
                 string command_sliced = command.substr(0, 1);
 
                 // run
@@ -237,6 +305,19 @@ int main(int argc, char **argv)
                 init.id = 1;
                 init.parent_id = 0;
                 init.state = "New";
+
+                for (i = 0; i < program_num; i++)
+                {
+                    if (program_name[i] == process_now.name)
+                    {
+                        command_queue = split(program_command[i], '\n');
+
+                        pid_command = make_pair(process_now.id, command_queue);
+                        pid_command_list.push_back(pid_command);
+
+                        break;
+                    }
+                }
             }
             //
             else if (cycle == 1)
@@ -247,8 +328,10 @@ int main(int argc, char **argv)
                 command = kernel_mode;
 
                 process_now.schedule();
+                cout << process_now.name << "\n";
+                cout << process_now.state << "\n";
             }
-            // fork (implement need!!!!!!)
+            // fork
             else if (fork_cycle != 0)
             {
                 fork_cycle -= 1;
@@ -259,6 +342,7 @@ int main(int argc, char **argv)
                     command = kernel_mode;
 
                     process forked_process = process(new_program_name);
+
                     process_list.push_back(forked_process);
                     forked_process.state = "New";
                     forked_process.parent_id = process_now.id;
@@ -268,6 +352,22 @@ int main(int argc, char **argv)
 
                     process_now.state = "Ready";
                     ready_queue.push_back(process_now);
+                    //
+                    // int pid_now = process_now.id;
+                    for (i = 0; i < program_num; i++)
+                    {
+                        if (program_name[i] == forked_process.name)
+                        {
+                            // program_command[i] 가공 -> command_queue에
+
+                            command_queue = split(program_command[i], '\n');
+
+                            pid_command = make_pair(forked_process.id, command_queue);
+                            pid_command_list.push_back(pid_command);
+
+                            break;
+                        }
+                    }
                 }
                 //
                 else if (fork_cycle == 0)
@@ -525,7 +625,7 @@ int main(int argc, char **argv)
         }
 
         // command
-        answer += "2. command: ";
+        answer += "\n2. command: ";
         answer += command;
         answer + "\n";
 
@@ -538,11 +638,11 @@ int main(int argc, char **argv)
             running += "(";
             running += process_now.name;
             running += ", ";
-            running += process_now.parent_id;
+            running += to_string(process_now.parent_id);
             running += ")";
         }
 
-        answer += "3. running: ";
+        answer += "\n3. running: ";
         answer += running;
         answer += "\n";
 
@@ -591,9 +691,14 @@ int main(int argc, char **argv)
                 new_str += "(";
                 new_str += iter->name;
                 new_str += ", ";
-                new_str += iter->parent_id;
+                new_str += to_string(iter->parent_id);
                 new_str += ")";
+
+                // debug
+                cout << iter->name << "\n";
+                cout << iter->state << "\n";
             }
+            // program_command[i] 가공 -> command_queue에
 
             answer += "6. new: ";
             answer += new_str;
@@ -641,8 +746,20 @@ int main(int argc, char **argv)
         }
 
         cycle += 1;
+
+        // delete
+        if (cycle == 5)
+        {
+            break;
+        }
+
+        std::cout << answer;
+        answer = "";
+
+        // answer -> file
+        // answer = "" reset
     }
 
-    std::cout << answer;
+    // std::cout << answer;
     return 0;
 }
