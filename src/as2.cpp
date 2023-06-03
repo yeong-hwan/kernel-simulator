@@ -140,15 +140,17 @@ int main(int argc, char **argv)
     */
     // 2d implement
     // 2d access
-    queue<string> *command_queue;
+    queue<string> command_queue;
+    queue<string> init_command_queue;
+    queue<string> fork_command_queue;
 
-    pair<int, queue<string>> pid_command;
-    pid_command = make_pair(0, *command_queue);
+    pair<int, queue<string> *> pid_command;
+    pid_command = make_pair(0, &command_queue);
 
-    list<pair<int, queue<string>>> pid_command_list;
+    list<pair<int, queue<string> *>> pid_command_list;
     pid_command_list.push_back(pid_command);
 
-    list<pair<int, queue<string>>>::iterator iter2;
+    // list<pair<int, queue<string>>>::iterator iter2;
 
     // for (iter2 = pid_command_list.begin(); iter2 != pid_command_list.end();
     //      iter2++) {
@@ -216,26 +218,21 @@ int main(int argc, char **argv)
             // not running
             if (run_reamin_cycle == 0)
             {
-                // for list 순회
-                //    int pid = pid_command.first
-                //    command_queue = pid_command.second
-                //    if process_now.id == pid:
-                //         command = command_queue.front()
-                //         command_queue.pop()
-                //         break;
-
-                // for (pair<int, queue<string>>& pid_command_now :
-                //      pid_command_list)
-                list<pair<int, queue<string>>>::iterator iter2;
+                list<pair<int, queue<string> *>>::iterator iter2;
+                queue<string> *user_command_queue;
                 for (iter2 = pid_command_list.begin(); iter2 != pid_command_list.end(); iter2++)
                 {
                     int pid = iter2->first;
-                    command_queue = &iter2->second;
-
+                    user_command_queue = iter2->second;
+                    // cout << pid << "\n";
+                    // while (!user_command_queue.empty()) {
+                    //     cout << user_command_queue.front() << "\n";
+                    //     user_command_queue.pop();
+                    // }
                     if (process_now.id == pid)
                     {
-                        command = (*command_queue).front();
-                        (*command_queue).pop();
+                        command = (*user_command_queue).front();
+                        (*user_command_queue).pop();
 
                         break;
                     }
@@ -313,9 +310,14 @@ int main(int argc, char **argv)
                 {
                     if (program_name[i] == process_now.name)
                     {
-                        *command_queue = split(program_command[i], '\n');
+                        init_command_queue = split(program_command[i], '\n');
 
-                        pid_command = make_pair(process_now.id, *command_queue);
+                        // while (!command_queue.empty()) {
+                        //     cout << command_queue.front() << "\n";
+                        //     command_queue.pop();
+                        // }
+
+                        pid_command = make_pair(process_now.id, &init_command_queue);
                         pid_command_list.push_back(pid_command);
 
                         break;
@@ -332,10 +334,11 @@ int main(int argc, char **argv)
 
                 process_now.schedule();
 
-                for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
-                {
-                    process *temp = *iter3;
-                }
+                // for (iter3 = process_list.begin(); iter3 !=
+                // process_list.end();
+                //      iter3++) {
+                //     process* temp = *iter3;
+                // }
             }
             // fork
             else if (fork_cycle != 0)
@@ -348,7 +351,7 @@ int main(int argc, char **argv)
                     command = kernel_mode;
 
                     forked_process = process(new_program_name);
-
+                    cout << new_program_name << "\n";
                     process_list.push_back(&forked_process);
                     forked_process.state = "New";
                     forked_process.parent_id = process_now.id;
@@ -360,15 +363,16 @@ int main(int argc, char **argv)
                     ready_queue.push_back(&process_now);
                     //
                     // int pid_now = process_now.id;
+
                     for (i = 0; i < program_num; i++)
                     {
                         if (program_name[i] == forked_process.name)
                         {
                             // program_command[i] 가공 -> command_queue에
 
-                            *command_queue = split(program_command[i], '\n');
+                            fork_command_queue = split(program_command[i], '\n');
 
-                            pid_command = make_pair(forked_process.id, *command_queue);
+                            pid_command = make_pair(forked_process.id, &fork_command_queue);
                             pid_command_list.push_back(pid_command);
 
                             break;
@@ -393,7 +397,7 @@ int main(int argc, char **argv)
                 }
             }
             // sleep
-            if (process_now.is_wait == "on")
+            else if (process_now.is_wait == "on")
             {
                 // sleep == 1
                 if (sleep_case == 1)
