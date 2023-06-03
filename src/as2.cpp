@@ -94,7 +94,8 @@ int main(int argc, char **argv)
 
     string end_trigger = "off";
     process process_terminated;
-    process forked_process;
+    process *forked_process;
+    process forked_process_save;
 
     string user_trigger = "off";
 
@@ -347,32 +348,70 @@ int main(int argc, char **argv)
 
                 if (fork_cycle == 1)
                 {
+                    // string ready = " none";
+                    // if (process_list.size() != 0) {
+                    //     ready = "";
+
+                    //     for (iter = process_list.begin();
+                    //          iter != process_list.end(); iter++) {
+                    //         process* temp = *iter;
+                    //         ready += " ";
+                    //         ready += to_string(temp->id);
+                    //     }
+                    // }
+                    // cout << ready << "\n";
+
+                    // 2 | 2
+                    process new_forked_process;
+                    // 0 | 2
+
                     kernel_mode = "system call";
                     command = kernel_mode;
 
-                    forked_process = process(new_program_name);
-                    cout << new_program_name << "\n";
-                    process_list.push_back(&forked_process);
-                    forked_process.state = "New";
-                    forked_process.parent_id = process_now.id;
+                    new_forked_process = process(new_program_name);
+
+                    process_list.push_back(&new_forked_process);
+                    new_forked_process.state = "New";
+                    // 0 | 2
+
+                    new_forked_process.parent_id = process_now.id;
 
                     process_id += 1;
-                    forked_process.id = process_id;
+                    new_forked_process.id = process_id;
+
+                    // 3 | 2
 
                     process_now.state = "Ready";
                     ready_queue.push_back(&process_now);
-                    //
-                    // int pid_now = process_now.id;
+                    forked_process = &new_forked_process;
+
+                    // 3 1 | 2 1
+                    // ----------------------
+                    // ready queue check
+
+                    // string ready = " none";
+                    // if (ready_queue.size() != 0) {
+                    //     ready = "";
+
+                    //     for (iter = ready_queue.begin();
+                    //          iter != ready_queue.end(); iter++) {
+                    //         process* temp = *iter;
+                    //         ready += " ";
+                    //         ready += to_string(temp->id);
+                    //     }
+                    // }
+                    // cout << ready << "\n";
+                    // ------------------------
 
                     for (i = 0; i < program_num; i++)
                     {
-                        if (program_name[i] == forked_process.name)
+                        if (program_name[i] == forked_process->name)
                         {
                             // program_command[i] 가공 -> command_queue에
 
                             fork_command_queue = split(program_command[i], '\n');
 
-                            pid_command = make_pair(forked_process.id, &fork_command_queue);
+                            pid_command = make_pair(forked_process->id, &fork_command_queue);
                             pid_command_list.push_back(pid_command);
 
                             break;
@@ -390,8 +429,8 @@ int main(int argc, char **argv)
 
                     process_now.schedule();
 
-                    ready_queue.push_back(&forked_process);
-                    forked_process.state = "Ready";
+                    ready_queue.push_back(forked_process);
+                    forked_process->state = "Ready";
 
                     user_trigger = "on";
                 }
