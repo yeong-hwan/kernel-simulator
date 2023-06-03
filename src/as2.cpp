@@ -76,9 +76,9 @@ int main(int argc, char **argv)
     string kernel_mode = "";
     string command = "";
 
-    list<process> process_list;
+    list<process *> process_list;
     process process_now;
-    list<process> ready_queue;
+    list<process *> ready_queue;
     list<string> waiting_queue;
 
     int run_reamin_cycle = 0;
@@ -140,10 +140,10 @@ int main(int argc, char **argv)
     */
     // 2d implement
     // 2d access
-    queue<string> command_queue;
+    queue<string> *command_queue;
 
     pair<int, queue<string>> pid_command;
-    pid_command = make_pair(0, command_queue);
+    pid_command = make_pair(0, *command_queue);
 
     list<pair<int, queue<string>>> pid_command_list;
     pid_command_list.push_back(pid_command);
@@ -180,27 +180,29 @@ int main(int argc, char **argv)
 
         answer += "1. mode: ";
         answer += mode;
-        list<process>::iterator iter;
+        list<process *>::iterator iter;
         list<string>::iterator iter1;
+        list<process *>::iterator iter3;
         // each process
-        for (iter = process_list.begin(); iter != process_list.end(); iter++)
+        for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
         {
+            process *temp = *iter3;
             int now_pid = 0;
-            if (iter->wait_cnt != 0)
+            if (temp->wait_cnt != 0)
             {
-                iter->wait_cnt -= 1;
-                if (iter->wait_cnt == 1)
+                temp->wait_cnt -= 1;
+                if (temp->wait_cnt == 1)
                 {
-                    now_pid = iter->id;
+                    now_pid = temp->id;
                     for (iter1 = waiting_queue.begin(); iter1 != waiting_queue.end(); iter1++)
                     {
                         string process_candidate = *iter1;
                         int process_wait_pid = stoi(process_candidate.substr(process_candidate.length() - 3));
                         if (process_wait_pid == now_pid)
                         {
-                            iter->state = "Ready";
+                            temp->state = "Ready";
                             waiting_queue.erase(iter1);
-                            ready_queue.push_back(*iter);
+                            ready_queue.push_back(temp);
                             break;
                         }
                     }
@@ -228,12 +230,13 @@ int main(int argc, char **argv)
                 for (iter2 = pid_command_list.begin(); iter2 != pid_command_list.end(); iter2++)
                 {
                     int pid = iter2->first;
-                    command_queue = iter2->second;
+                    command_queue = &iter2->second;
 
                     if (process_now.id == pid)
                     {
-                        command = command_queue.front();
-                        command_queue.pop();
+                        command = (*command_queue).front();
+                        (*command_queue).pop();
+
                         break;
                     }
                 }
@@ -261,7 +264,7 @@ int main(int argc, char **argv)
                 // fork_and_exec
                 else if (command_sliced == "f")
                 {
-                    string new_program_name = command.substr(14);
+                    new_program_name = command.substr(14);
                     fork_cycle = 2;
 
                     mode = "kernel";
@@ -300,19 +303,19 @@ int main(int argc, char **argv)
 
                 process init = process("init");
                 process_now = init;
-                process_list.push_back(process_now);
+                process_list.push_back(&process_now);
 
-                init.id = 1;
-                init.parent_id = 0;
-                init.state = "New";
+                process_now.id = 1;
+                process_now.parent_id = 0;
+                process_now.state = "New";
 
                 for (i = 0; i < program_num; i++)
                 {
                     if (program_name[i] == process_now.name)
                     {
-                        command_queue = split(program_command[i], '\n');
+                        *command_queue = split(program_command[i], '\n');
 
-                        pid_command = make_pair(process_now.id, command_queue);
+                        pid_command = make_pair(process_now.id, *command_queue);
                         pid_command_list.push_back(pid_command);
 
                         break;
@@ -328,8 +331,11 @@ int main(int argc, char **argv)
                 command = kernel_mode;
 
                 process_now.schedule();
-                cout << process_now.name << "\n";
-                cout << process_now.state << "\n";
+
+                for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
+                {
+                    process *temp = *iter3;
+                }
             }
             // fork
             else if (fork_cycle != 0)
@@ -338,12 +344,12 @@ int main(int argc, char **argv)
 
                 if (fork_cycle == 1)
                 {
-                    kernel_mode = "system_call";
+                    kernel_mode = "system call";
                     command = kernel_mode;
 
-                    process forked_process = process(new_program_name);
+                    forked_process = process(new_program_name);
 
-                    process_list.push_back(forked_process);
+                    process_list.push_back(&forked_process);
                     forked_process.state = "New";
                     forked_process.parent_id = process_now.id;
 
@@ -351,7 +357,7 @@ int main(int argc, char **argv)
                     forked_process.id = process_id;
 
                     process_now.state = "Ready";
-                    ready_queue.push_back(process_now);
+                    ready_queue.push_back(&process_now);
                     //
                     // int pid_now = process_now.id;
                     for (i = 0; i < program_num; i++)
@@ -360,9 +366,9 @@ int main(int argc, char **argv)
                         {
                             // program_command[i] 가공 -> command_queue에
 
-                            command_queue = split(program_command[i], '\n');
+                            *command_queue = split(program_command[i], '\n');
 
-                            pid_command = make_pair(forked_process.id, command_queue);
+                            pid_command = make_pair(forked_process.id, *command_queue);
                             pid_command_list.push_back(pid_command);
 
                             break;
@@ -375,12 +381,12 @@ int main(int argc, char **argv)
                     kernel_mode = "schedule";
                     command = kernel_mode;
 
-                    process_now = ready_queue.front();
+                    process_now = *ready_queue.front();
                     ready_queue.pop_front();
 
                     process_now.schedule();
 
-                    ready_queue.push_back(forked_process);
+                    ready_queue.push_back(&forked_process);
                     forked_process.state = "Ready";
 
                     user_trigger = "on";
@@ -399,7 +405,7 @@ int main(int argc, char **argv)
 
                         process_now.state = "Waiting";
                         process_now.state = "Ready";
-                        ready_queue.push_back(process_now);
+                        ready_queue.push_back(&process_now);
                     }
                     else
                     {
@@ -407,7 +413,7 @@ int main(int argc, char **argv)
                         command = kernel_mode;
 
                         // process_now = ready_queue.pop(0)
-                        process_now = ready_queue.front();
+                        process_now = *ready_queue.front();
                         ready_queue.pop_front();
 
                         process_now.schedule();
@@ -428,7 +434,7 @@ int main(int argc, char **argv)
                         process_now.state = "Waiting";
 
                         string waiting_msg = "";
-                        waiting_msg += process_now.id;
+                        waiting_msg += to_string(process_now.id);
                         waiting_msg += "(S)";
 
                         waiting_queue.push_back(waiting_msg);
@@ -439,7 +445,7 @@ int main(int argc, char **argv)
                         command = kernel_mode;
 
                         // process_now = ready_queue.pop(0)
-                        process_now = ready_queue.front();
+                        process_now = *ready_queue.front();
                         ready_queue.pop_front();
 
                         process_now.schedule();
@@ -461,7 +467,7 @@ int main(int argc, char **argv)
                         command = kernel_mode;
 
                         string waiting_msg = "";
-                        waiting_msg += process_now.id;
+                        waiting_msg += to_string(process_now.id);
                         waiting_msg += "(S)";
 
                         waiting_queue.push_back(waiting_msg);
@@ -483,7 +489,7 @@ int main(int argc, char **argv)
                         // need 245!!!!!!!!!!!!!!!!!!!!!!11
 
                         process_now.state = "Ready";
-                        ready_queue.push_back(process_now);
+                        ready_queue.push_back(&process_now);
 
                         user_trigger = "on";
                         sleep_case = 0;
@@ -497,7 +503,7 @@ int main(int argc, char **argv)
                             kernel_mode = "schedule";
                             command = kernel_mode;
 
-                            process_now = ready_queue.front();
+                            process_now = *ready_queue.front();
                             ready_queue.pop_front();
 
                             process_now.state = "Ready";
@@ -532,11 +538,12 @@ int main(int argc, char **argv)
 
                     process_now.state = "Ready";
 
-                    for (iter = process_list.begin(); iter != process_list.end(); iter++)
+                    for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
                     {
-                        if (iter->parent_id == process_now.id)
+                        process *temp = *iter3;
+                        if (temp->parent_id == process_now.id)
                         {
-                            if (iter->state == "dead" or iter->state == "Terminated")
+                            if (temp->state == "dead" or temp->state == "Terminated")
                             {
                                 process_now.state = "Waiting";
                                 wait_trigger = "on";
@@ -562,7 +569,7 @@ int main(int argc, char **argv)
                         kernel_mode = "schedule";
                         command = kernel_mode;
 
-                        process_now = ready_queue.front();
+                        process_now = *ready_queue.front();
                         ready_queue.pop_front();
 
                         process_now.schedule();
@@ -609,7 +616,7 @@ int main(int argc, char **argv)
                         kernel_mode = "schedule";
                         command = kernel_mode;
 
-                        process_now = ready_queue.front();
+                        process_now = *ready_queue.front();
                         ready_queue.pop_front();
 
                         process_now.schedule();
@@ -634,7 +641,7 @@ int main(int argc, char **argv)
 
         if (process_now.state == "Running")
         {
-            running = process_now.id;
+            running = to_string(process_now.id);
             running += "(";
             running += process_now.name;
             running += ", ";
@@ -651,12 +658,13 @@ int main(int argc, char **argv)
 
         if (ready_queue.size() != 0)
         {
-            string ready = "";
+            ready = "";
 
             for (iter = ready_queue.begin(); iter != ready_queue.end(); iter++)
             {
+                process *temp = *iter;
                 ready += " ";
-                ready += iter->id;
+                ready += to_string(temp->id);
             }
         }
 
@@ -682,28 +690,32 @@ int main(int argc, char **argv)
         answer += "\n";
 
         // new
-        string new_str = "none";
-        for (iter = process_list.begin(); iter != process_list.end(); iter++)
-        {
-            if (iter->state == "New")
-            {
-                new_str = iter->id;
-                new_str += "(";
-                new_str += iter->name;
-                new_str += ", ";
-                new_str += to_string(iter->parent_id);
-                new_str += ")";
 
+        // cout << process_now.name << "\n";
+        // cout << process_now.state << "\n";
+
+        string new_str = "none";
+        for (iter3 = process_list.begin(); iter3 != process_list.end(); iter3++)
+        {
+            // cout << iter->name << "\n";
+            // cout << iter->state << "\n";
+            process *temp = *iter3;
+            if (temp->state == "New")
+            {
                 // debug
-                cout << iter->name << "\n";
-                cout << iter->state << "\n";
+
+                new_str = to_string(temp->id);
+                new_str += "(";
+                new_str += temp->name;
+                new_str += ", ";
+                new_str += to_string(temp->parent_id);
+                new_str += ")";
             }
             // program_command[i] 가공 -> command_queue에
-
-            answer += "6. new: ";
-            answer += new_str;
-            answer += "\n";
         }
+        answer += "6. new: ";
+        answer += new_str;
+        answer += "\n";
 
         // terminated
         string terminated;
@@ -717,11 +729,11 @@ int main(int argc, char **argv)
         }
         else if (process_terminated.state == "Terminated")
         {
-            terminated += process_terminated.id;
+            terminated += to_string(process_terminated.id);
             terminated += "(";
             terminated += process_terminated.name;
             terminated += ", ";
-            terminated += process_terminated.parent_id;
+            terminated += to_string(process_terminated.parent_id);
             terminated += ")";
 
             answer += "7. terminated: ";
@@ -748,7 +760,7 @@ int main(int argc, char **argv)
         cycle += 1;
 
         // delete
-        if (cycle == 5)
+        if (cycle == 15)
         {
             break;
         }
